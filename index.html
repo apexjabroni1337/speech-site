@@ -51,7 +51,12 @@ footer { max-width:860px; margin:0 auto; padding:0 20px 40px; color:#9ca3af; fon
 .pgtitle { font-weight:700; }
 .pgtitle a { text-decoration:none; color:var(--ink); }
 .pgtitle a:hover { color:var(--brand); }
-@media (max-width:640px){ .tagline{display:none} .search input{width:150px} }
+.getbtn { background:var(--brand); color:#fff; border-radius:999px; padding:8px 14px; font-size:13px; font-weight:700; text-decoration:none; white-space:nowrap; }
+.getbtn:hover { background:#4338ca; }
+.dlbtn { display:inline-block; background:var(--brand); color:#fff; border-radius:10px; padding:12px 22px; font-size:15px; font-weight:700; text-decoration:none; }
+.dlbtn:hover { background:#4338ca; }
+.legal p { margin:10px 0; }
+@media (max-width:640px){ .tagline{display:none} .search input{width:150px} .getbtn{display:none} }
 </style>
 </head>
 <body>
@@ -62,9 +67,10 @@ footer { max-width:860px; margin:0 auto; padding:0 20px 40px; color:#9ca3af; fon
     <input id="q" placeholder="Find people…" autocomplete="off">
     <div id="sres" class="sres" style="display:none"></div>
   </div>
+  <a class="getbtn" href="#/install">Get the extension</a>
 </div></header>
 <main id="app"></main>
-<footer>Reading is open to everyone. Posting, voting, friends &amp; groups happen in the SPEECH browser extension.</footer>
+<footer>Reading is open to everyone. Posting, voting, friends &amp; groups happen in the <a href="#/install">SPEECH browser extension</a>. · <a href="#/privacy">Privacy</a></footer>
 <script>
 const SB  = "https://cvrkvxmhsdzweikvrnxo.supabase.co";
 const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2cmt2eG1oc2R6d2Vpa3ZybnhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwOTA2MjAsImV4cCI6MjA5NjY2NjYyMH0._opqu4NE_5Wx0C4IK4czHrVRcZJ7wWhX2aOurkOtYOc";
@@ -195,6 +201,44 @@ async function thread(pid) {
   }
 }
 
+// ---------- install & privacy ----------
+
+const ZIP_URL = "https://github.com/apexjabroni1337/speech-extension/archive/refs/heads/main.zip";
+
+async function installPage() {
+  app.replaceChildren(
+    el("div", { class: "crumb" }, el("a", { href: "#/", text: "← Home" })),
+    el("h2", { text: "Get the SPEECH extension" }),
+    el("div", { class: "card" },
+      el("div", { class: "pgtitle", text: "1 · Download" }),
+      el("div", { class: "domain", text: "Download the zip and extract it somewhere permanent (Chrome loads it from that folder)." }),
+      el("div", { style: "margin-top:12px" }, el("a", { class: "dlbtn", href: ZIP_URL, text: "⬇ Download SPEECH (.zip)" }))),
+    el("div", { class: "card" },
+      el("div", { class: "pgtitle", text: "2 · Turn on Developer mode" }),
+      el("div", { class: "domain", text: "In Chrome, Edge or Brave: open chrome://extensions and flip the Developer mode switch (top right)." })),
+    el("div", { class: "card" },
+      el("div", { class: "pgtitle", text: "3 · Load it" }),
+      el("div", { class: "domain", text: "Click “Load unpacked” and select the extracted speech-extension-main folder. Then visit any website and hit the 💬 Speech button to join the conversation." })),
+    el("div", { class: "note", text: "This is the alpha. The Chrome Web Store version is coming — until then this sideload is the way in." })
+  );
+}
+
+async function privacyPage() {
+  const P = (t) => el("p", { text: t });
+  app.replaceChildren(
+    el("div", { class: "crumb" }, el("a", { href: "#/", text: "← Home" })),
+    el("h2", { text: "Privacy policy" }),
+    el("div", { class: "card legal" },
+      P("SPEECH is an open comment layer for the web. This is what we store and why."),
+      P("Account data: your email address and a hashed password, used only for signing in. Your username, display name and bio are public."),
+      P("Content: comments, votes, friend connections, group memberships, interest tags, and reports you submit are stored in our database. Comments, votes, profiles and groups are public — that is the point of the product."),
+      P("Page addresses: when someone comments on a page, we store that page's address and title so others can find the thread. To show comment counts, the extension checks the current page's address against our database; addresses are only stored permanently when a page has been commented on."),
+      P("We do not sell or share personal data, run ads, or use third-party trackers or analytics. Data lives in our database hosted by Supabase."),
+      P("Deletion: you can delete your own comments in the extension. For full account deletion, contact us via the email on our store listing and we will remove your account and personal data."),
+      P("Changes to this policy will be posted on this page."))
+  );
+}
+
 // ---------- user search ----------
 
 const q = document.getElementById("q");
@@ -225,7 +269,11 @@ function router() {
   const h = location.hash || "#/";
   const mu = h.match(/^#\/u\/(.+)$/);
   const mp = h.match(/^#\/p\/(\d+)$/);
-  const run = mu ? () => profile(decodeURIComponent(mu[1])) : mp ? () => thread(mp[1]) : home;
+  const run = mu ? () => profile(decodeURIComponent(mu[1]))
+    : mp ? () => thread(mp[1])
+    : h === "#/install" ? installPage
+    : h === "#/privacy" ? privacyPage
+    : home;
   run().catch(err => app.replaceChildren(el("div", { class: "empty", text: "Something went wrong: " + err.message })));
   window.scrollTo(0, 0);
 }
