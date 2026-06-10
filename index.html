@@ -37,6 +37,8 @@ a { color:var(--brand); }
 .ava { width:74px; height:74px; min-width:74px; border-radius:50%; background:var(--brand); color:#fff; display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:800; }
 .pname { font-size:22px; font-weight:800; }
 .puser { color:var(--mut); }
+.star { font-size:12px; cursor:default; }
+.supchip { display:inline-block; background:#fef3c7; color:#92400e; border:1px solid #fcd34d; border-radius:999px; padding:1px 10px; font-size:12px; font-weight:700; margin-top:6px; }
 .bio { margin-top:6px; white-space:pre-wrap; }
 .stats { color:var(--mut); font-size:13px; margin-top:6px; }
 .reply { margin-left:34px; }
@@ -111,6 +113,7 @@ function commentCard(c, { showPage = true, reply = false } = {}) {
   return el("div", { class: "card" + (reply ? " reply" : "") },
     el("div", { class: "meta" },
       el("a", { class: "u", href: "#/u/" + encodeURIComponent(c.username), text: c.display_name || c.username }),
+      c.is_supporter ? el("span", { class: "star", text: " ⭐", title: "Supporter" }) : null,
       txt(" @" + c.username + " · " + ago(c.created_at))
     ),
     el("div", { class: "cbody" + (c.is_deleted ? " del" : ""), text: c.body }),
@@ -156,6 +159,7 @@ async function profile(uname) {
       el("div", {},
         el("div", { class: "pname", text: p.display_name || p.username }),
         el("div", { class: "puser", text: "@" + p.username }),
+        p.is_supporter ? el("div", {}, el("span", { class: "supchip", text: "⭐ Supporter" })) : null,
         p.bio ? el("div", { class: "bio", text: p.bio }) : null,
         el("div", { class: "stats", text: comments.length + (comments.length === 100 ? "+" : "") + " comment" + (comments.length === 1 ? "" : "s") + " · joined " + new Date(p.created_at).toLocaleDateString() })
       )
